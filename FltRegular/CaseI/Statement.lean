@@ -61,7 +61,7 @@ theorem may_assume : SlightlyEasier → Statement := by
     · exact Nat.not_prime_mul one_lt_two.ne' one_lt_two.ne' hpri.out
   let d := ({a, b, c} : Finset ℤ).gcd id
   have hdiv : ¬↑p ∣ a / d * (b / d) * (c / d) := by
-    contrapose! hI with hdiv
+    contrapose hI with hdiv
     have hadiv : d ∣ a := gcd_dvd (by simp)
     have hbdiv : d ∣ b := gcd_dvd (by simp)
     have hcdiv : d ∣ c := gcd_dvd (by simp)

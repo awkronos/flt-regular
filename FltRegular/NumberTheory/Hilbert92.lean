@@ -296,11 +296,6 @@ instance : CommGroup (relativeUnitsWithGenerator p hp hKL σ hσ) := by
 
 end
 
-/- Mathlib only provides `IsAddTorsionFree` for this quotient. For commutative groups this is
-equivalent to `HasUniqueDiv` (needed for `Module.IsTorsionFree ℤ`), but there is no instance. -/
-local instance {M : Type*} [AddCommGroup M] : HasUniqueDiv (M ⧸ AddCommGroup.torsion M) :=
-  ⟨fun _ hn _ _ ↦ eq_of_nsmul_eq_nsmul_of_addCommute hn (.all _ _)⟩
-
 local notation "G" =>
   Additive (relativeUnitsWithGenerator p hp hKL σ hσ) ⧸
     AddCommGroup.torsion (Additive (relativeUnitsWithGenerator p hp hKL σ hσ))
