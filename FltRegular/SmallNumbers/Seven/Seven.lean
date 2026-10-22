@@ -1,22 +1,23 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+import Mathlib.NumberTheory.NumberField.ClassNumber
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Embeddings
+import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 import Mathlib.Tactic.NormNum.Prime
-
-import FltRegular.SmallNumbers.Cyclotomic
-import FltRegular.SmallNumbers.OrderOf
 
 /-!
 # The ring of integers of the seventh cyclotomic field
 
 This file computes the relevant Minkowski bound and proves that the ring of integers of a
-seventh-cyclotomic number field is a principal ideal domain.
+seventh-cyclotomic number field is a principal ideal domain. The bound is `4`, and the primes `2`
+and `3` have inertia degrees `3` and `6` in `ℚ(ζ₇)`, so no prime above them has norm at most `4`.
 -/
 
 @[expose] public section
 
-open NumberField Module NumberField.InfinitePlace Nat Real RingOfIntegers Finset Multiset
-  IsCyclotomicExtension.Rat Polynomial cyclotomic UniqueFactorizationMonoid
+open NumberField Module NumberField.InfinitePlace Nat Real RingOfIntegers
+  IsCyclotomicExtension.Rat Polynomial cyclotomic Ideal
 
 variable {K : Type*} [Field K] [NumberField K]
 
@@ -54,23 +55,24 @@ theorem M7 : ⌊(M K)⌋₊ = 4 := by
     reduceSub, neg_mul, one_mul, Int.cast_neg, Int.cast_ofNat, abs_neg, abs_ofNat]
   exact crazy7
 
-/-- The explicit seventh cyclotomic polynomial over `ℤ`. -/
-theorem cyclotomic_7 : cyclotomic 7 ℤ =
-    X ^ 6 + X ^ 5 + X ^ 4 + X ^ 3 + X ^ 2 + X + 1 := by
-  simp [cyclotomic_prime, sum_range_succ]
-  ring
-
 variable (K) in
 /-- The ring of integers of a seventh-cyclotomic number field is a principal ideal domain. -/
 theorem Rat.seven_pid : IsPrincipalIdealRing (𝓞 K) := by
-  apply IsCyclotomicExtension.Rat.pid6 7
-  rw [M7, cyclotomic_7]
-  intro p hple hp hpn
-  fin_cases hple
-  any_goals norm_num at hp
-  all_goals
-    left
-    simp only [reduceAdd]
-    refine orderOf_lt_of (by norm_num) (fun i hi hipos ↦ ?_)
-    have hmem := Finset.mem_Icc.mpr ⟨hipos, hi⟩
-    fin_cases hmem <;> norm_num
+  have : IsGalois ℚ K := IsCyclotomicExtension.isGalois {7} ℚ K
+  refine isPrincipalIdealRing_of_isPrincipal_of_lt_or_isPrincipal_of_mem_primesOver_of_mem_Icc
+    fun p hp hprime ↦ ?_
+  have : (span {(p : ℤ)}).IsPrime :=
+    isPrime_of_prime (prime_span_singleton_iff.mpr (prime_iff_prime_int.mp hprime))
+  obtain ⟨⟨P, _, _⟩⟩ := (span {(p : ℤ)}).nonempty_primesOver (S := 𝓞 K)
+  refine ⟨P, ⟨‹_›, ‹_›⟩, Or.inl ?_⟩
+  rw [M7] at hp ⊢
+  obtain ⟨h₁, h₄⟩ := Finset.mem_Icc.mp hp
+  interval_cases p
+  · norm_num at hprime
+  · have h : orderOf (2 : ZMod 7) = 3 := (orderOf_eq_iff (by norm_num)).mpr ⟨by decide, by decide⟩
+    rw [inertiaDeg_eq_of_not_dvd (m := 7) 2 K P (by norm_num)]
+    norm_num [h]
+  · have h : orderOf (3 : ZMod 7) = 6 := (orderOf_eq_iff (by norm_num)).mpr ⟨by decide, by decide⟩
+    rw [inertiaDeg_eq_of_not_dvd (m := 7) 3 K P (by norm_num)]
+    norm_num [h]
+  · norm_num at hprime
