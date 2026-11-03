@@ -84,3 +84,34 @@ see the dedicated
 on the perfectoid project website.
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/leanprover-community/flt-regular)
+
+---
+
+## Contributions
+
+This section is written by the owner of this fork, [awkronos](https://github.com/awkronos),
+and describes only what this fork changes. Everything above it is upstream text from
+[leanprover-community/flt-regular](https://github.com/leanprover-community/flt-regular). The
+mathematics here -- Fermat's Last Theorem for regular primes, and every declaration under
+`FltRegular/` -- is upstream's; this fork claims no theorem.
+
+Measured at the revision this section was written (2026-11-03, via
+`gh api "repos/awkronos/flt-regular/compare/leanprover-community:master...master"`):
+**2 commits ahead of upstream `master`, 1 behind**, fork HEAD
+`f6806dabdeca739881d11ebfc360fb6e7db2623a` (2026-11-01), and `README.md` blob-identical to
+upstream's (`ebac6eec64956850d50a4d7435c25efc5d295ecb`).
+
+The complete list of Awkronos changes to this repository:
+
+1. **CI only.** [PR #1](https://github.com/awkronos/flt-regular/pull/1) (lane
+   `CISEC-ELAN-1026`, merged 2026-11-01) replaced the `Install elan` step -- which piped
+   `curl` from the elan repo's mutable `master` branch into `sh` -- with an install from a
+   pinned `leanprover/elan` release asset (`v4.2.4`) whose per-platform SHA256 is verified
+   before extraction, run under `set -euo pipefail` so a failed fetch can no longer report
+   green, followed by an `Assert elan` version check. Two files changed,
+   `.github/workflows/main.yml` and `.github/workflows/push.yml`, +30/-1 each.
+2. **This `## Contributions` section.**
+
+Nothing else: no Lean source, `lean-toolchain` pin, `lake-manifest.json` pin, document, or
+other tracked path is modified by this fork. For a result, cite upstream; cite this fork only
+when the pinned CI setup is itself what you used.
