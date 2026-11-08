@@ -45,17 +45,16 @@ theorem aux_lem_flt [Fact p.Prime] {x y z : ℤ} (H : x ^ p + y ^ p = z ^ p)
     ZMod.intCast_zmod_eq_zero_iff_dvd] at H
   exact caseI (Dvd.dvd.mul_left H _)
 
-theorem diff_of_roots [hp : Fact p.Prime] (ph : 5 ≤ p) {η₁ η₂ : R}
+theorem diff_of_roots [hp : Fact p.Prime] {η₁ η₂ : R}
     (hη₁ : η₁ ∈ nthRootsFinset p 1) (hη₂ : η₂ ∈ nthRootsFinset p 1)
     (hdiff : η₁ ≠ η₂) (hwlog : η₁ ≠ 1) :
     ∃ u : Rˣ, η₁ - η₂ = u * (1 - η₁) := by
-  have _ : 2 ≤ p := le_trans (by decide) ph
   have h := isPrimitiveRoot_of_mem_nthRootsFinset Fact.out hη₁ hwlog
   rcases h.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hp.out hη₁ hη₂ hdiff with
     ⟨u, hu⟩
   exact ⟨-u, by grind [Units.val_neg]⟩
 
-lemma fltIdeals_coprime2_lemma [Fact p.Prime] (ph : 5 ≤ p) {x y : ℤ} {η₁ η₂ : R}
+lemma fltIdeals_coprime2_lemma [Fact p.Prime] {x y : ℤ} {η₁ η₂ : R}
     (hη₁ : η₁ ∈ nthRootsFinset p 1)
     (hη₂ : η₂ ∈ nthRootsFinset p 1) (hdiff : η₁ ≠ η₂) (hp : IsCoprime x y)
     (hp2 : ¬(p : ℤ) ∣ (x + y : ℤ)) (hwlog : η₁ ≠ 1) :
@@ -72,22 +71,22 @@ lemma fltIdeals_coprime2_lemma [Fact p.Prime] (ph : 5 ≤ p) {x y : ℤ} {η₁ 
   have hroot : IsCoprime (x + η₁ * y : R) (1 - η₁) := by
     convert hcop.symm.add_mul_left_left (-y) using 1
     ring
-  obtain ⟨u, hu⟩ := diff_of_roots ph hη₁ hη₂ hdiff hwlog
+  obtain ⟨u, hu⟩ := diff_of_roots hη₁ hη₂ hdiff hwlog
   have hdiff : IsCoprime (x + η₁ * y : R) ((η₁ - η₂) * y) := by
     rw [hu, mul_assoc, isCoprime_mul_unit_left_right u.isUnit]
     exact hroot.mul_right (hp.intCast.add_mul_right_left η₁)
   convert hdiff.neg_right.add_mul_right_right 1 using 1
   ring
 
-theorem fltIdeals_coprime2 [Fact p.Prime] (ph : 5 ≤ p) {x y : ℤ} {η₁ η₂ : R}
+theorem fltIdeals_coprime2 [Fact p.Prime] {x y : ℤ} {η₁ η₂ : R}
     (hη₁ : η₁ ∈ nthRootsFinset p 1) (hη₂ : η₂ ∈ nthRootsFinset p 1)
     (hdiff : η₁ ≠ η₂) (hp : IsCoprime x y)
     (hp2 : ¬(p : ℤ) ∣ (x + y : ℤ)) (hwlog : η₁ ≠ 1) :
     IsCoprime (fltIdeals p x y hη₁) (fltIdeals p x y hη₂) := by
   simpa [Ideal.isCoprime_iff_add] using
-    fltIdeals_coprime2_lemma ph hη₁ hη₂ hdiff hp hp2 hwlog
+    fltIdeals_coprime2_lemma hη₁ hη₂ hdiff hp hp2 hwlog
 
-theorem fltIdeals_coprime (hpri : p.Prime) (p5 : 5 ≤ p) {x y z : ℤ}
+theorem fltIdeals_coprime (hpri : p.Prime) {x y z : ℤ}
     (H : x ^ p + y ^ p = z ^ p) {η₁ η₂ : R} (hxy : IsCoprime x y)
     (hη₁ : η₁ ∈ nthRootsFinset p 1) (hη₂ : η₂ ∈ nthRootsFinset p 1)
     (hdiff : η₁ ≠ η₂)
@@ -95,13 +94,10 @@ theorem fltIdeals_coprime (hpri : p.Prime) (p5 : 5 ≤ p) {x y z : ℤ}
     have : Fact p.Prime := ⟨hpri⟩
     IsCoprime (fltIdeals p x y hη₁) (fltIdeals p x y hη₂) := by
   have : Fact p.Prime := ⟨hpri⟩
-  by_cases h : η₁ ≠ 1
-  · exact fltIdeals_coprime2 p5 hη₁ hη₂ hdiff hxy (aux_lem_flt H caseI) h
-  · have h2 : η₂ ≠ 1 := by
-      simp only [ne_eq, not_not] at h
-      rw [h] at hdiff
-      exact hdiff.symm
-    exact (fltIdeals_coprime2 p5 hη₂ hη₁ hdiff.symm hxy (aux_lem_flt H caseI) h2).symm
+  by_cases h : η₁ = 1
+  · exact (fltIdeals_coprime2 hη₂ hη₁ hdiff.symm hxy (aux_lem_flt H caseI)
+      fun h2 ↦ hdiff (h.trans h2.symm)).symm
+  · exact fltIdeals_coprime2 hη₁ hη₂ hdiff hxy (aux_lem_flt H caseI) h
 
 variable {L}
 

@@ -26,15 +26,10 @@ instance : CommRing (CyclotomicIntegers p) := by
   delta CyclotomicIntegers
   infer_instance
 
-open Polynomial in
 lemma IsPrimitiveRoot.cyclotomic_eq_minpoly
     (x : 𝓞 (CyclotomicField p ℚ)) (hx : IsPrimitiveRoot x.1 p) :
-    minpoly ℤ x = cyclotomic p ℤ := by
-  apply Polynomial.map_injective (algebraMap ℤ ℚ) (RingHom.injective_int (algebraMap ℤ ℚ))
-  rw [← minpoly.isIntegrallyClosed_eq_field_fractions ℚ (CyclotomicField p ℚ)
-    (IsIntegralClosure.isIntegral _ (CyclotomicField p ℚ) _),
-    ← cyclotomic_eq_minpoly_rat (n := p) (hpos := hpri.out.pos), map_cyclotomic]
-  exact hx
+    minpoly ℤ x = cyclotomic p ℤ :=
+  (RingOfIntegers.minpoly_coe x).symm.trans (Polynomial.cyclotomic_eq_minpoly hx hpri.out.pos).symm
 
 namespace CyclotomicIntegers
 
@@ -106,13 +101,8 @@ lemma powerBasis_dim : (powerBasis p).dim = p - 1 := by
 
 instance : Module.Free ℤ (CyclotomicIntegers p) := ⟨_, (powerBasis p).basis⟩
 
-lemma nontrivial {p} (hp : p ≠ 0) : Nontrivial (CyclotomicIntegers p) := by
-  apply Ideal.Quotient.nontrivial_iff.mpr
-  simp only [ne_eq, Ideal.span_singleton_eq_top]
-  intro h
-  have hdegree := natDegree_eq_zero_of_isUnit h
-  rw [natDegree_cyclotomic] at hdegree
-  exact hdegree.not_gt (Nat.totient_pos.2 <| Nat.zero_lt_of_ne_zero hp)
+lemma nontrivial {p} (hp : p ≠ 0) : Nontrivial (CyclotomicIntegers p) :=
+  AdjoinRoot.nontrivial _ (degree_cyclotomic_pos p ℤ (Nat.pos_of_ne_zero hp)).ne'
 
 lemma charZero {p} (hp : p ≠ 0) : CharZero (CyclotomicIntegers p) :=
   have := nontrivial hp

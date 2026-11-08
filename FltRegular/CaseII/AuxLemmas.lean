@@ -18,14 +18,10 @@ lemma exists_not_dvd_spanSingleton_eq {R : Type*} [CommRing R] [IsDedekindDomain
     (h : Submodule.IsPrincipal ((I / J : FractionalIdeal R⁰ K) : Submodule R K)) : ∃ a b : R,
     ¬(x ∣ a) ∧ ¬(x ∣ b) ∧
       spanSingleton R⁰ (algebraMap R K a / algebraMap R K b) = I / J := by
-  have hI' : (I : FractionalIdeal R⁰ K) ≠ 0 := by
-    rw [← coeIdeal_bot, Ne, coeIdeal_inj]
-    rintro rfl
-    exact hI (dvd_zero _)
-  have hJ' : (J : FractionalIdeal R⁰ K) ≠ 0 := by
-    rw [← coeIdeal_bot, Ne, coeIdeal_inj]
-    rintro rfl
-    exact hJ (dvd_zero _)
+  have hI' : (I : FractionalIdeal R⁰ K) ≠ 0 :=
+    coeIdeal_ne_zero.mpr (by rintro rfl; exact hI (dvd_zero _))
+  have hJ' : (J : FractionalIdeal R⁰ K) ≠ 0 :=
+    coeIdeal_ne_zero.mpr (by rintro rfl; exact hJ (dvd_zero _))
   rw [isPrincipal_iff] at h
   obtain ⟨r, hr⟩ := h
   obtain ⟨s, t, rfl⟩ := IsLocalization.exists_mk'_eq R⁰ r

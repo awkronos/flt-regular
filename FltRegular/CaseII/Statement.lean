@@ -40,11 +40,8 @@ lemma not_exists_solution' : ¬∃ (x y z : 𝓞 K), ¬(hζ.toInteger : 𝓞 K) 
         z = ((hζ.toInteger : 𝓞 K) - 1) ^ m * z' := by
     obtain ⟨m, z', hz'', rfl⟩ :=
       WfDvdMonoid.max_power_factor hz' hζ.zeta_sub_one_prime'.irreducible
-    refine ⟨m, z', ?_, hz'', rfl⟩
-    rcases Nat.eq_zero_or_pos m with rfl | h
-    · simp only [pow_zero, one_mul] at hz
-      exact absurd hz hz''
-    · exact h
+    refine ⟨m, z', Nat.pos_of_ne_zero fun hm ↦ hz'' ?_, hz'', rfl⟩
+    simpa [hm] using hz
   refine not_exists_solution hp hreg hζ hm ⟨x, y, z, 1, hy, hz'', ?_⟩
   rwa [Units.val_one, one_mul]
 

@@ -69,11 +69,7 @@ theorem a_not_cong_b {p : ℕ} {a b c : ℤ} (hpri : p.Prime) (hp5 : 5 ≤ p)
     linarith
   · simp only [← hgcd, Finset.gcd_insert, id_eq, ← Int.coe_gcd, Int.neg_gcd,
       ← LawfulSingleton.insert_empty_eq, Finset.gcd_empty, Int.gcd_left_comm]
-  · have hp3 : p ≠ 3 := by lia
-    rw [← ZMod.intCast_eq_intCast_iff] at habs hab
-    rw [hab] at habs
-    rw [ZMod.intCast_eq_intCast_iff] at habs hab
-    obtain ⟨n, hn⟩ := p_dvd_c_of_ab_of_anegc hpri hp3 h hab habs
+  · obtain ⟨n, hn⟩ := p_dvd_c_of_ab_of_anegc hpri (by lia) h hab (hab.symm.trans habs)
     refine caseI ⟨a * b * n, ?_⟩
     rw [hn]
     ring

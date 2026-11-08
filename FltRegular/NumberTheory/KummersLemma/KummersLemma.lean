@@ -21,7 +21,7 @@ open Polynomial IsCyclotomicExtension.Rat
 open scoped NumberField
 
 variable {K : Type} {p : ℕ} [hpri : Fact p.Prime] [Field K] [NumberField K]
-  [IsCyclotomicExtension {p} ℚ K] (hp : p ≠ 2) [Fintype (ClassGroup (𝓞 K))]
+  (hp : p ≠ 2) [Fintype (ClassGroup (𝓞 K))]
   (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K))
   {ζ : K} (hζ : IsPrimitiveRoot ζ p)
 
@@ -32,24 +32,22 @@ theorem exists_pow_eq_of_zeta_sub_one_pow_dvd_sub_one {u : (𝓞 K)ˣ}
   by_contra! hu
   have hirr := irreducible_X_pow_sub_C_of_prime hpri.out hu
   have := Fact.mk hirr
+  have hζ' : (primitiveRoots p K).Nonempty := ⟨ζ, (mem_primitiveRoots (NeZero.pos p)).mpr hζ⟩
   let L := AdjoinRoot (X ^ p - C (u : K))
-  have := isSplittingField_AdjoinRoot_X_pow_sub_C
-    ⟨ζ, (mem_primitiveRoots (NeZero.pos p)).mpr hζ⟩ hirr
-  have := isGalois_of_isSplittingField_X_pow_sub_C
-    ⟨ζ, (mem_primitiveRoots (NeZero.pos p)).mpr hζ⟩ hirr L
+  have := isSplittingField_AdjoinRoot_X_pow_sub_C hζ' hirr
+  have := isGalois_of_isSplittingField_X_pow_sub_C hζ' hirr L
   have := IsSplittingField.finiteDimensional L (X ^ p - C (u : K))
-  have := isCyclic_of_isSplittingField_X_pow_sub_C
-    ⟨ζ, (mem_primitiveRoots (NeZero.pos p)).mpr hζ⟩ hirr L
+  have := isCyclic_of_isSplittingField_X_pow_sub_C hζ' hirr L
   have : CharZero L := charZero_of_injective_algebraMap (algebraMap K L).injective
   have : FiniteDimensional ℚ L := Module.Finite.trans K L
   have : NumberField L := ⟨⟩
-  have hKL : Module.finrank K L = p :=
-    finrank_of_isSplittingField_X_pow_sub_C
-      ⟨ζ, (mem_primitiveRoots (NeZero.pos p)).mpr hζ⟩ hirr L
+  have hKL : Module.finrank K L = p := finrank_of_isSplittingField_X_pow_sub_C hζ' hirr L
   have := KummersLemma.isUnramified hp hζ u hcong hu L
   have := dvd_card_classGroup_of_unramified_isCyclic (hKL.symm ▸ hpri.out) (hKL.symm ▸ hp)
   rw [hKL, hpri.out.dvd_iff_not_coprime] at this
   exact this (by convert hreg)
+
+variable [IsCyclotomicExtension {p} ℚ K]
 
 /-- A regular prime criterion: if a unit of the cyclotomic field is congruent to an integer
 modulo `p`, then it is a `p`-th power. -/

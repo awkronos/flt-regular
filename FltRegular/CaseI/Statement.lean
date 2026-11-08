@@ -159,11 +159,8 @@ theorem exists_ideal {a b c : ℤ} (h5p : 5 ≤ p) (H : a ^ p + b ^ p = c ^ p)
     odd_iff.2 <| hpri.1.eq_two_or_odd.resolve_left fun h ↦ by simp [h] at h5p] at H₁
   replace H₁ := congr_arg (fun x ↦ span ({x} : Set R)) H₁
   simp only [← prod_span_singleton, ← span_singleton_pow] at H₁
-  refine exists_eq_pow_of_mul_eq_pow_of_coprime (fun η₁ hη₁ η₂ hη₂ hη ↦ ?_) H₁ ζ
-    hζ
-  refine fltIdeals_coprime ?_ ?_ H (ab_coprime H hpri.out.ne_zero hgcd) hη₁ hη₂ hη caseI
-  · exact hpri.out
-  · exact h5p
+  exact exists_eq_pow_of_mul_eq_pow_of_coprime (fun η₁ hη₁ η₂ hη₂ hη ↦
+    fltIdeals_coprime hpri.out H (ab_coprime H hpri.out.ne_zero hgcd) hη₁ hη₂ hη caseI) H₁ ζ hζ
 
 /-- The cyclotomic factor `a + ζ * b` is a unit times a `p`-th power. -/
 theorem is_principal {a b c : ℤ} {ζ : R} (hreg : IsRegularPrime p) (hp5 : 5 ≤ p)

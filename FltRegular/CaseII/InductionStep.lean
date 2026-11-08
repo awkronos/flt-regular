@@ -42,11 +42,8 @@ variable (η : nthRootsFinset p (1 : 𝓞 K))
 include e in
 omit [NumberField K] in
 lemma zeta_sub_one_dvd : π ∣ x ^ p + y ^ p := by
-  rw [e, mul_pow, ← pow_mul]
-  apply dvd_mul_of_dvd_right
-  apply dvd_mul_of_dvd_left
-  apply dvd_pow_self
-  simp [NeZero.ne]
+  rw [e]
+  exact (dvd_pow ((dvd_pow_self _ (Nat.succ_ne_zero m)).mul_right z) (NeZero.ne p)).mul_left _
 
 include e in
 omit [NumberField K] in
@@ -166,11 +163,8 @@ instance : Finite (𝓞 K ⧸ 𝔭) := Ring.HasFiniteQuotients.finiteQuotient (p
 include hy in
 lemma div_zeta_sub_one_Bijective :
     Function.Bijective (fun η ↦ Ideal.Quotient.mk 𝔭 (divZetaSubOne hp hζ e η)) := by
-  let := Fintype.ofFinite (𝓞 K ⧸ 𝔭)
-  rw [Fintype.bijective_iff_injective_and_card]
-  use div_zeta_sub_one_Injective hp hζ e hy
-  simp only [Fintype.card_coe]
-  rw [hζ.toInteger_isPrimitiveRoot.card_nthRootsFinset, ← Nat.card_eq_fintype_card,
+  refine (div_zeta_sub_one_Injective hp hζ e hy).bijective_of_nat_card_le ?_
+  rw [Nat.card_eq_finsetCard, hζ.toInteger_isPrimitiveRoot.card_nthRootsFinset,
     ← Submodule.cardQuot_apply, ← Ideal.absNorm_apply, Ideal.absNorm_span_singleton]
   simp [show Algebra.norm ℤ π = _ from hζ.norm_toInteger_sub_one_of_prime_ne_two' hp]
 
@@ -275,10 +269,8 @@ lemma c_div_principal_aux (η₁ η₂ : nthRootsFinset p (1 : 𝓞 K)) :
     ((𝔦 η₁) / (𝔦 η₂) : FractionalIdeal (𝓞 K)⁰ K) = 𝔠 η₁ / 𝔠 η₂ := by
   simp_rw [← m_mul_c_mul_p hp hζ e hy, FractionalIdeal.coeIdeal_mul]
   rw [mul_div_mul_right, mul_div_mul_left]
-  · rw [← FractionalIdeal.coeIdeal_bot, (FractionalIdeal.coeIdeal_injective' le_rfl).ne_iff]
-    exact m_ne_zero hζ hy
-  · rw [← FractionalIdeal.coeIdeal_bot, (FractionalIdeal.coeIdeal_injective' le_rfl).ne_iff]
-    exact p_ne_zero hζ
+  · exact FractionalIdeal.coeIdeal_ne_zero.mpr (m_ne_zero hζ hy)
+  · exact FractionalIdeal.coeIdeal_ne_zero.mpr (p_ne_zero hζ)
 
 lemma c_div_principal (η₁ η₂ : nthRootsFinset p (1 : 𝓞 K)) : Submodule.IsPrincipal
     ((𝔠 η₁ / 𝔠 η₂ : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K) := by
@@ -352,10 +344,7 @@ lemma not_p_div_a_zero : ¬ 𝔭 ∣ 𝔞₀ := by
   · apply hz
     rw [← Ideal.mem_span_singleton, ← Ideal.dvd_span_singleton, z_div_m_spec hζ e hy]
     exact this.trans (dvd_mul_left _ _)
-  · apply mt eq_zero_of_pow_eq_zero
-    apply mt eq_zero_of_pow_eq_zero
-    rw [Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
+  · exact pow_ne_zero _ (pow_ne_zero _ (p_ne_zero hζ))
 
 include hp hζ e hy hz in
 lemma one_le_m : 1 ≤ m := by
@@ -406,11 +395,7 @@ lemma isPrincipal_a_div_a_zero : Submodule.IsPrincipal
     ← map_mul] at ha
   · rw [FractionalIdeal.isPrincipal_iff]
     exact ⟨_, ha⟩
-  · rw [← FractionalIdeal.coeIdeal_bot,
-      (FractionalIdeal.coeIdeal_injective' (le_rfl : (𝓞 K)⁰ ≤ (𝓞 K)⁰)).ne_iff]
-    apply mt eq_zero_of_pow_eq_zero
-    rw [Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-    exact hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt
+  · exact FractionalIdeal.coeIdeal_ne_zero.mpr (pow_ne_zero _ (p_ne_zero hζ))
 
 include hz hreg in
 lemma exists_not_dvd_spanSingleton_eq_a_div_a_zero (hη : η ≠ η₀) :
@@ -455,11 +440,8 @@ lemma a_mul_denom_eq_a_zero_mul_num (hη : η ≠ η₀) :
   simp only [FractionalIdeal.coeIdeal_mul, FractionalIdeal.coeIdeal_span_singleton]
   rw [mul_comm (𝔞₀ : FractionalIdeal (𝓞 K)⁰ K), ← div_eq_div_iff,
     ← a_div_a_zero_eq hp hζ e hy hz η hreg hη, FractionalIdeal.spanSingleton_div_spanSingleton]
-  · intro ha
-    rw [FractionalIdeal.coeIdeal_eq_zero] at ha
-    apply not_p_div_a_zero hp hζ e hy hz
-    rw [ha]
-    exact dvd_zero _
+  · exact FractionalIdeal.coeIdeal_ne_zero.mpr
+      fun ha ↦ not_p_div_a_zero hp hζ e hy hz (ha ▸ dvd_zero _)
   · rw [Ne, FractionalIdeal.spanSingleton_eq_zero_iff, ← (algebraMap (𝓞 K) K).map_zero,
       (IsFractionRing.injective (𝓞 K) K).eq_iff]
     intro hβ

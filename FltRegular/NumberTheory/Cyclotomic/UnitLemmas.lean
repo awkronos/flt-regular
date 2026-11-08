@@ -37,9 +37,7 @@ variable [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
 include hζ in
 /-- Complex conjugation sends a primitive `p`-th root of unity to its inverse. -/
--- The primality instance is retained for compatibility with existing callers.
-@[nolint unusedArguments]
-theorem complexConj_zeta [Fact (p.Prime)] (hp : 2 < p) :
+theorem complexConj_zeta (hp : 2 < p) :
     haveI := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp⟩
     complexConj K ζ = ζ⁻¹ := by
   let _ := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp⟩
@@ -81,12 +79,9 @@ theorem unit_inv_conj_is_root_of_unity (u : (𝓞 K)ˣ) [H : Fact (p.Prime)] (hp
   let _ := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp⟩
   have hpo : Odd p := H.out.odd_of_ne_two hp.ne'
   have hη : (η : K) = ζ := by rw [IsUnit.unit_spec]; rfl
-  have hroot : IsOfFinOrder (u * (unitsComplexConj K u)⁻¹ : K) := by
-    have h : IsOfFinOrder (u * (unitsComplexConj K u)⁻¹) :=
-      (CommGroup.mem_torsion _).mp (unitsMulComplexConjInv K u).property
-    exact (Function.Injective.isOfFinOrder_iff
-      (f := (algebraMap (𝓞 K) K).toMonoidHom.comp (Units.coeHom (𝓞 K)))
-      (NumberField.Units.coe_injective K)).mpr h
+  have hroot : IsOfFinOrder (u * (unitsComplexConj K u)⁻¹ : K) :=
+    ((algebraMap (𝓞 K) K).toMonoidHom.comp (Units.coeHom (𝓞 K))).isOfFinOrder
+      ((CommGroup.mem_torsion _).mp (unitsMulComplexConjInv K u).property)
   obtain ⟨n, -, hz | hz⟩ := hζ.exists_pow_or_neg_mul_pow_of_isOfFinOrder hpo hroot
   · have hz' : u * (unitsComplexConj K u)⁻¹ = η ^ n := by
       apply NumberField.Units.coe_injective

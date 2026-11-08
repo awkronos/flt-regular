@@ -20,7 +20,7 @@ open scoped NumberField
 
 attribute [local implicit_reducible] integralClosure NumberField.RingOfIntegers
 
-variable {K : Type*} {p : ℕ} [hpri : Fact p.Prime] [Field K] [NumberField K] (hp : p ≠ 2)
+variable {K : Type*} {p : ℕ} [hpri : Fact p.Prime] [Field K] (hp : p ≠ 2)
 
 variable {ζ : K} (hζ : IsPrimitiveRoot ζ p)
 
@@ -30,9 +30,7 @@ variable (u : (𝓞 K)ˣ)
 open Polynomial IsCyclotomicExtension.Rat
 
 include hcong hp in
--- The cyclotomic-extension instance is retained for compatibility with existing callers.
-@[nolint unusedArguments]
-lemma zeta_sub_one_pow_dvd_poly [IsCyclotomicExtension {p} ℚ K] :
+lemma zeta_sub_one_pow_dvd_poly :
     C ((hζ.toInteger - 1 : 𝓞 K) ^ p) ∣
       (C (hζ.toInteger - 1 : 𝓞 K) * X - 1) ^ p + C (u : 𝓞 K) := by
   rw [← dvd_sub_left (_root_.map_dvd C hcong), add_sub_assoc, C.map_sub (u : 𝓞 K), ← sub_add,
@@ -45,14 +43,12 @@ lemma zeta_sub_one_pow_dvd_poly [IsCyclotomicExtension {p} ℚ K] :
 
 namespace KummersLemma
 
-omit [NumberField K] in
 lemma natDegree_poly_aux :
     natDegree ((C (hζ.toInteger - 1 : 𝓞 K) * X - 1) ^ p + C (u : 𝓞 K)) = p := by
   rw [natDegree_add_C, natDegree_pow, ← C.map_one, natDegree_sub_C, natDegree_mul_X, natDegree_C,
     zero_add, mul_one]
   exact C_ne_zero.mpr (hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt)
 
-omit [NumberField K] in
 lemma monic_poly_aux :
     leadingCoeff ((C (hζ.toInteger - 1 : 𝓞 K) * X - 1) ^ p + C (u : 𝓞 K)) =
       (hζ.toInteger - 1 : 𝓞 K) ^ p := by
@@ -65,7 +61,6 @@ lemma monic_poly_aux :
     · simp only [map_one, natDegree_C, zero_add, coeff_sub, coeff_mul_X, coeff_C,
         coeff_one, sub_zero, one_ne_zero, ↓reduceIte]
     · exact C_ne_zero.mpr (hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt)
-variable [IsCyclotomicExtension {p} ℚ K]
 
 /-- The monic polynomial used in Kummer's lemma after dividing by `(ζ - 1)^p`. -/
 noncomputable def poly : (𝓞 K)[X] := (zeta_sub_one_pow_dvd_poly hp hζ u hcong).choose
@@ -196,15 +191,6 @@ lemma minpoly_polyRoot'' {L : Type*} [Field L] [Algebra K L] (α : L)
   rw [aeval_def, eval₂_map, ← IsScalarTower.algebraMap_eq, ← aeval_def]
   exact aeval_poly hp hζ u hcong α e i
 
-include hu in
-lemma minpoly_polyRoot' {L : Type*} [Field L] [Algebra K L] (α : L)
-    (e : α ^ p = algebraMap K L u) (i) :
-    minpoly (𝓞 K) (polyRoot hp hζ u hcong α e i : L) = (poly hp hζ u hcong) := by
-  apply map_injective (algebraMap (𝓞 K) K) Subtype.coe_injective
-  rw [← minpoly.isIntegrallyClosed_eq_field_fractions' K]
-  · exact minpoly_polyRoot'' hp hζ u hcong hu α e i
-  · exact IsIntegral.tower_top (polyRoot hp hζ u hcong α e i).prop
-
 lemma separable_poly_aux {L : Type*} [Field L] [Algebra K L] (α : L)
     (e : α ^ p = algebraMap K L u) : Separable ((poly hp hζ u hcong).map
     (algebraMap (𝓞 K) (𝓞 L))) := by
@@ -291,6 +277,17 @@ lemma mem_adjoin_polyRoot {L : Type*} [Field L] [Algebra K L] (α : L)
     rw [polyRoot_spec hp hζ u hcong α e i]
   exact Subalgebra.smul_mem _ (sub_mem (one_mem _)
     (Subalgebra.smul_mem _ (Algebra.self_mem_adjoin_singleton K _) _)) _
+
+variable [NumberField K]
+
+include hu in
+lemma minpoly_polyRoot' {L : Type*} [Field L] [Algebra K L] (α : L)
+    (e : α ^ p = algebraMap K L u) (i) :
+    minpoly (𝓞 K) (polyRoot hp hζ u hcong α e i : L) = (poly hp hζ u hcong) := by
+  apply map_injective (algebraMap (𝓞 K) K) Subtype.coe_injective
+  rw [← minpoly.isIntegrallyClosed_eq_field_fractions' K]
+  · exact minpoly_polyRoot'' hp hζ u hcong hu α e i
+  · exact IsIntegral.tower_top (polyRoot hp hζ u hcong α e i).prop
 
 include hu hp hζ hcong in
 attribute [local instance] Ideal.Quotient.field in
